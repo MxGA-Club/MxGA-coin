@@ -1,0 +1,28 @@
+-include .env
+
+clean:; forge clean
+
+build:; forge build
+
+install:; \
+    forge install foundry-rs/forge-std@v1.9.3 --no-commit --no-git && \
+    forge install OpenZeppelin/openzeppelin-contracts@v5.0.2 --no-commit --no-git && \
+    forge install LayerZero-Labs/devtools --no-commit --no-git && \
+    forge install LayerZero-Labs/layerzero-v2 --no-commit --no-git && \
+    forge install LayerZero-Labs/LayerZero --no-commit --no-git && \
+    forge install GNSPS/solidity-bytes-utils --no-commit --no-git
+
+deploy-main-sepolia:
+    forge script script/DeployMxGA.s.sol:DeployMxGA --sig "deployMxGA(address)" $(TEAM_VESTING_WALLET_ADDRESS) --rpc-url $(SEPOLIA_RPC_URL) --private-key $(DEPLOYER_PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(SEPOLIA_ETHERSCAN_API_KEY) -vvvv
+
+deploy-trading-bitlayer-testnet:
+    forge script script/DeployMxGA.s.sol:DeployMxGA --sig "deployMxGATrading()" --rpc-url $(BITLAYER_TESTNET_RPC_URL) --private-key $(DEPLOYER_PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(BITLAYER_TESTNET_ETHERSCAN_API_KEY) -vvvv --legacy
+
+set-config-main-sepolia:
+    forge script script/SetConfig.s.sol:SetConfig --rpc-url $(SEPOLIA_RPC_URL) --private-key $(DEPLOYER_PRIVATE_KEY) --broadcast -vvvv
+
+set-config-trading-bitlayer-testnet:
+    forge script script/SetConfig.s.sol:SetConfig --rpc-url $(BITLAYER_TESTNET_RPC_URL) --private-key $(DEPLOYER_PRIVATE_KEY) --broadcast -vvvv --legacy
+
+bridge-token-from-sepolia-to-bitlayer-testnet:
+    forge script script/BridgeToken.s.sol:BridgeToken --sig "bridgeToken(string)" "BITLAYER_TESTNET" --rpc-url ${SEPOLIA_RPC_URL} --private-key ${DEPLOYER_PRIVATE_KEY} --broadcast -vvvv 
